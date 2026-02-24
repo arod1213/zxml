@@ -17,21 +17,6 @@ fn getProperty(comptime T: type, node: Node, property_name: []const u8) !T {
     return try strToT(T, val_str);
 }
 
-fn getChild(parent: Node, field_name: []const u8) ?Node {
-    var child = parent.children();
-    while (child) |ch| : (child = ch.next()) {
-        switch (ch.node_type) {
-            .Element => {},
-            else => continue,
-        }
-        std.log.info("looking at node {s}", .{ch.name});
-        if (std.mem.eql(u8, field_name, ch.name)) {
-            return ch;
-        }
-    }
-    return null;
-}
-
 pub fn nodeToT(comptime T: type, alloc: Allocator, node: Node) !T {
     const info = @typeInfo(T);
     assert(info == .@"struct");

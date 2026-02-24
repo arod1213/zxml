@@ -4,13 +4,6 @@ const assert = std.debug.assert;
 const print = std.debug.print;
 const c = @import("lib.zig").c;
 
-fn cPtrToNull(comptime T: type, x: [*c]T) ?T {
-    if (x == null) {
-        return null;
-    }
-    return x.*;
-}
-
 pub const ParseType = enum(c_uint) {
     huge = c.XML_PARSE_HUGE,
     compact = c.XML_PARSE_COMPACT,

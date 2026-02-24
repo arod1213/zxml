@@ -39,13 +39,15 @@ fn saveUniqueNode(comptime T: type, alloc: Allocator, node: Node, name: []const 
                 std.log.err("parse err: {any}", .{e});
                 continue;
             };
-            const key_val = key(value);
 
-            const owned_key = try alloc.dupe(u8, key_val);
-            const res = try map.getOrPut(owned_key);
+            const key_val = key(value);
+            const res = try map.getOrPut(key_val);
             if (res.found_existing) {
                 continue;
             }
+
+            const owned_key = try alloc.dupe(u8, key_val);
+            res.key_ptr.* = owned_key;
             res.value_ptr.* = value;
         }
 

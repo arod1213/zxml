@@ -129,6 +129,10 @@ pub const Node = struct {
         };
     }
 
+    pub fn deinit(self: *Node) void {
+        c.xmlFreeNode(self.ptr);
+    }
+
     pub fn setProperty(self: *const Node, name: []const u8, value: []const u8) void {
         _ = c.xmlSetProp(self.ptr, @ptrCast(name), @ptrCast(value));
     }

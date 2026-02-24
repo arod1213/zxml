@@ -1,12 +1,27 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
-const print = std.debug.print;
 
-const c = @import("lib.zig").c;
-const types = @import("./types.zig");
 const utils = @import("utils.zig");
+const types = @import("./types.zig");
 const Node = types.Node;
+
+pub fn structToNode(comptime T: type, alloc: Allocator, x: T) !Node {
+    const info = @typeInfo(T);
+    assert(info == .@"struct");
+
+    const struct_name = utils.simpleTypeName(T);
+    var parent: Node = try Node.new(struct_name, null);
+
+    inline for (info.@"struct".fields) |field| {
+        const value = try getValue(alloc, field.type, @field(x, field.name), field.name, parent);
+        switch (value) {
+            .field => |f| parent.setProperty(field.name, f),
+            .child => {},
+        }
+    }
+    return parent;
+}
 
 const ValueType = union(enum) { field: []const u8, child: Node };
 fn getValue(alloc: Allocator, comptime T: type, value: T, field_name: []const u8, parent_node: Node) !ValueType {
@@ -29,21 +44,4 @@ fn getValue(alloc: Allocator, comptime T: type, value: T, field_name: []const u8
         else => unreachable,
     };
     return .{ .field = value_str };
-}
-
-pub fn structToNode(comptime T: type, alloc: Allocator, x: T) !Node {
-    const info = @typeInfo(T);
-    assert(info == .@"struct");
-
-    const struct_name = utils.simpleTypeName(T);
-    var parent: Node = try Node.new(struct_name, null);
-
-    inline for (info.@"struct".fields) |field| {
-        const value = try getValue(alloc, field.type, @field(x, field.name), field.name, parent);
-        switch (value) {
-            .field => |f| parent.setProperty(field.name, f),
-            .child => {},
-        }
-    }
-    return parent;
 }

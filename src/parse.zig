@@ -3,7 +3,7 @@ const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
 const print = std.debug.print;
 
-pub const find = @import("./find.zig");
+const find = @import("./find.zig");
 const types = @import("./types.zig");
 const Doc = types.Doc;
 const Node = types.Node;

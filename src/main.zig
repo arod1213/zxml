@@ -3,6 +3,7 @@ const zxml = @import("zxml");
 
 pub const Other = struct {
     weirdness: []const u8 = "very",
+    info: ?[]const u8 = null,
 };
 
 pub const Abc = struct {

@@ -12,8 +12,8 @@ const ValueType = union(enum) { field: []const u8, child: Node };
 fn getValue(alloc: Allocator, comptime T: type, value: T, field_name: []const u8, parent_node: Node) !ValueType {
     const field_info = @typeInfo(T);
     const value_str = switch (field_info) {
+        .optional => |opt| if (value == null) return .{ .field = "" } else return try getValue(alloc, opt.child, value.?, field_name, parent_node),
         .null => "",
-        .optional => |opt| if (value == null) "" else try getValue(opt.child, alloc, field_name, value),
         .bool => try std.fmt.allocPrint(alloc, "{any}", .{value}),
         .int,
         .comptime_int,

@@ -6,8 +6,17 @@ const print = std.debug.print;
 pub const types = @import("./types.zig");
 const Doc = types.Doc;
 const Node = types.Node;
+pub const write = @import("write.zig");
 
 pub const parse = @import("./parse.zig");
+pub const c = @import("lib.zig").c;
+
+pub fn parserSetup() void {
+    c.xmlInitParser();
+}
+pub fn parserDeinit() void {
+    c.xmlCleanupParser();
+}
 
 pub fn getUniqueNodes(comptime T: type, alloc: Allocator, head: Node, name: []const u8, key: fn (T) []const u8) !std.StringArrayHashMap(T) {
     // const info = @typeInfo(T);

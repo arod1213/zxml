@@ -3,11 +3,12 @@ const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
 const print = std.debug.print;
 
-const types = @import("./types.zig");
-pub const Doc = types.Doc;
-
-pub const Node = types.Node;
 pub const find = @import("./find.zig");
+const types = @import("./types.zig");
+const Doc = types.Doc;
+const Node = types.Node;
+
+const utils = @import("utils.zig");
 
 fn getProperty(comptime T: type, node: Node, property_name: []const u8) !T {
     assert(@typeInfo(T) != .@"struct");
@@ -29,13 +30,6 @@ fn getChild(parent: Node, field_name: []const u8) ?Node {
         }
     }
     return null;
-}
-
-fn simpleTypeName(comptime T: type) []const u8 {
-    const full = @typeName(T);
-    const idx = std.mem.lastIndexOf(u8, full, ".") orelse return full;
-    // TODO: this could break
-    return full[idx + 1 ..];
 }
 
 pub fn nodeToT(comptime T: type, alloc: Allocator, node: Node) !T {
@@ -60,7 +54,7 @@ pub fn nodeToT(comptime T: type, alloc: Allocator, node: Node) !T {
                     switch (@typeInfo(ptr.child)) {
                         .@"struct" => {
                             const parent = find.getNode(node, field.name, .child) orelse return error.MissingField;
-                            const type_name = simpleTypeName(ptr.child);
+                            const type_name = utils.simpleTypeName(ptr.child);
                             const children = try find.getNodes(alloc, parent, type_name, .child);
 
                             var list = try std.ArrayList(ptr.child).initCapacity(alloc, 5);

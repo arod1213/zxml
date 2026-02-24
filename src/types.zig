@@ -56,7 +56,7 @@ pub const Doc = struct {
         if (doc == null) return error.ParseFailed;
 
         const root_elem = c.xmlDocGetRootElement(doc);
-        const root = if (root_elem != null) Node.init(root_elem.*) else null;
+        const root = if (root_elem != null) Node.init(root_elem) else null;
         return .{
             .ptr = doc,
             .root = root,
@@ -141,14 +141,14 @@ pub const Node = struct {
     }
 
     pub fn parent(self: *const Node) ?Node {
-        return if (self.parent != null) Node.init(self.parent.*) else null;
+        return if (self.parent != null) Node.init(self.parent) else null;
     }
 
     pub fn children(self: *const Node) ?Node {
-        return if (self.child_node != null) Node.init(self.child_node.*) else null;
+        return if (self.child_node != null) Node.init(self.child_node) else null;
     }
 
     pub fn next(self: *const Node) ?Node {
-        return if (self.next_node != null) Node.init(self.next_node.*) else null;
+        return if (self.next_node != null) Node.init(self.next_node) else null;
     }
 };

@@ -116,13 +116,15 @@ pub const Node = struct {
     }
 
     pub fn init(ptr: [*c]c.xmlNode) Node {
-        const node_type = std.meta.intToEnum(NodeType, ptr.type) catch .Text;
+        assert(ptr != null);
+        const obj = ptr.*;
+        const node_type = std.meta.intToEnum(NodeType, obj.type) catch .Text;
         return .{
             .ptr = ptr,
-            .name = std.mem.span(ptr.name),
-            .child_node = ptr.children,
-            .parent_node = ptr.parent,
-            .next_node = ptr.next,
+            .name = std.mem.span(obj.name),
+            .child_node = obj.children,
+            .parent_node = obj.parent,
+            .next_node = obj.next,
             .node_type = node_type,
         };
     }

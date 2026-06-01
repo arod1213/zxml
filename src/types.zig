@@ -111,7 +111,7 @@ pub const Node = struct {
     pub fn init(ptr: [*c]c.xmlNode) Node {
         assert(ptr != null);
         const obj = ptr.*;
-        const node_type = std.enums.fromInt(NodeType, ptr.type) orelse .Text;
+        const node_type = std.enums.fromInt(NodeType, obj.type) orelse .Text;
         return .{
             .ptr = ptr,
             .name = std.mem.span(obj.name),

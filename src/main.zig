@@ -13,11 +13,11 @@ pub const Abc = struct {
     age: usize,
 };
 
-pub fn main() !void {
+pub fn main(init: std.process.Init) !void {
     zxml.parserSetup();
     defer zxml.parserDeinit();
 
-    const alloc = std.heap.page_allocator;
+    const alloc = init.arena.allocator();
 
     var doc = try zxml.types.Doc.new();
     // defer doc.deinit(); // -> double free ??

@@ -94,7 +94,7 @@ pub const Node = struct {
             }
         };
 
-        const node_type = std.meta.intToEnum(NodeType, new_node.*.type) catch .Text;
+        const node_type = std.enums.fromInt(NodeType, new_node.*.type) orelse .Text;
 
         return .{
             .parent_node = if (parent_node) |p| p.ptr else null,
@@ -111,7 +111,7 @@ pub const Node = struct {
     pub fn init(ptr: [*c]c.xmlNode) Node {
         assert(ptr != null);
         const obj = ptr.*;
-        const node_type = std.meta.intToEnum(NodeType, obj.type) catch .Text;
+        const node_type = std.enums.fromInt(NodeType, ptr.type) orelse .Text;
         return .{
             .ptr = ptr,
             .name = std.mem.span(obj.name),

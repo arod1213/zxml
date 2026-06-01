@@ -7,18 +7,19 @@ const parse = @import("./parse.zig");
 const types = @import("./types.zig");
 const Doc = types.Doc;
 const Node = types.Node;
+const Map = std.StringHashMap;
 
-pub fn getNodesUnique(comptime T: type, alloc: Allocator, head: Node, name: []const u8, key: fn (T) []const u8) !std.StringArrayHashMap(T) {
+pub fn getNodesUnique(comptime T: type, alloc: Allocator, head: Node, name: []const u8, key: fn (T) []const u8) !Map(T) {
     const info = @typeInfo(T);
     assert(info == .@"struct");
 
-    var map = std.StringArrayHashMap(T).init(alloc);
+    var map = Map(T).init(alloc);
     try map.ensureTotalCapacity(80);
     try saveUniqueNode(T, alloc, head, name, &map, key);
     return map;
 }
 
-fn saveUniqueNode(comptime T: type, alloc: Allocator, node: Node, name: []const u8, map: *std.StringArrayHashMap(T), key: fn (T) []const u8) !void {
+fn saveUniqueNode(comptime T: type, alloc: Allocator, node: Node, name: []const u8, map: *Map(T), key: fn (T) []const u8) !void {
     var current: ?Node = node;
 
     while (current) |n| : (current = n.next()) {

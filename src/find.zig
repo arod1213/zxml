@@ -9,26 +9,29 @@ const Doc = types.Doc;
 const Node = types.Node;
 const Map = std.StringHashMap;
 
-pub fn getNodesUnique(comptime T: type, alloc: Allocator, head: Node, name: []const u8, key: fn (T) []const u8) !Map(T) {
+pub fn getNodesUnique(comptime T: type, gpa: Allocator, head: Node, name: []const u8, key: fn (T) []const u8) !Map(T) {
     const info = @typeInfo(T);
     assert(info == .@"struct");
 
-    var map = Map(T).init(alloc);
+    var map = Map(T).init(gpa);
+    errdefer map.deinit(gpa);
+
     try map.ensureTotalCapacity(80);
-    try saveUniqueNode(T, alloc, head, name, &map, key);
+    try saveUniqueNode(T, gpa, head, name, &map, key);
     return map;
 }
 
-fn saveUniqueNode(comptime T: type, alloc: Allocator, node: Node, name: []const u8, map: *Map(T), key: fn (T) []const u8) !void {
+fn saveUniqueNode(comptime T: type, gpa: Allocator, node: Node, name: []const u8, map: *Map(T), key: fn (T) []const u8) !void {
     var current: ?Node = node;
 
     while (current) |n| : (current = n.next()) {
         if (std.mem.eql(u8, n.name, name)) {
             // change field name for non structs
-            const value = parse.nodeToT(T, alloc, n) catch |e| {
+            const value = parse.nodeToT(T, gpa, n) catch |e| {
                 std.log.err("parse err: {any}", .{e});
                 continue;
             };
+            errdefer gpa.free(value);
 
             const key_val = key(value);
             const res = try map.getOrPut(key_val);
@@ -36,21 +39,21 @@ fn saveUniqueNode(comptime T: type, alloc: Allocator, node: Node, name: []const 
                 continue;
             }
 
-            const owned_key = try alloc.dupe(u8, key_val);
+            const owned_key = try gpa.dupe(u8, key_val);
             res.key_ptr.* = owned_key;
             res.value_ptr.* = value;
         }
 
         if (n.children()) |child| {
-            try saveUniqueNode(T, alloc, child, name, map, key);
+            try saveUniqueNode(T, gpa, child, name, map, key);
         }
     }
 }
 
 pub const Direction = enum { child, neighbor };
-pub fn getNodes(alloc: Allocator, parent: Node, tag_name: []const u8, direction: Direction) ![]Node {
-    var list = try std.ArrayList(Node).initCapacity(alloc, 4);
-    errdefer list.deinit(alloc);
+pub fn getNodes(gpa: Allocator, parent: Node, tag_name: []const u8, direction: Direction) ![]Node {
+    var list = try std.ArrayList(Node).initCapacity(gpa, 4);
+    errdefer list.deinit(gpa);
 
     var start = switch (direction) {
         .child => parent.children(),
@@ -62,10 +65,10 @@ pub fn getNodes(alloc: Allocator, parent: Node, tag_name: []const u8, direction:
             else => continue,
         }
         if (std.mem.eql(u8, tag_name, ch.name)) {
-            try list.append(alloc, ch);
+            try list.append(gpa, ch);
         }
     }
-    return try list.toOwnedSlice(alloc);
+    return try list.toOwnedSlice(gpa);
 }
 
 pub fn getNode(parent: Node, tag_name: []const u8, direction: Direction) ?Node {

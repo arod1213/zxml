@@ -28,7 +28,8 @@ pub fn main(init: std.process.Init) !void {
     _ = try zxml.types.Node.new("son", node);
 
     const x: Abc = .{ .age = 55, .old = true };
-    const sub_child = try zxml.write.structToNode(Abc, alloc, x);
+    var sub_child = try zxml.write.structToNode(Abc, alloc, x);
+    defer sub_child.deinit();
     sub_child.attach(&node);
 
     try doc.save("./output.xml");

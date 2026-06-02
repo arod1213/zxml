@@ -14,7 +14,7 @@ pub fn getNodesUnique(comptime T: type, gpa: Allocator, head: Node, name: []cons
     assert(info == .@"struct");
 
     var map = Map(T).init(gpa);
-    errdefer map.deinit(gpa);
+    errdefer map.deinit();
 
     try map.ensureTotalCapacity(80);
     try saveUniqueNode(T, gpa, head, name, &map, key);

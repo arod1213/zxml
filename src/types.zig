@@ -137,7 +137,7 @@ pub const Node = struct {
         }
         defer c.xmlFreeProp(value);
 
-        return try gpa.dupe(u8, value);
+        return try gpa.dupe(u8, std.mem.span(value));
     }
 
     pub fn parent(self: *const Node) ?Node {

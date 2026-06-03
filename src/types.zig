@@ -130,13 +130,14 @@ pub const Node = struct {
         _ = c.xmlSetProp(self.ptr, @ptrCast(name), @ptrCast(value));
     }
 
-    pub fn getProperty(self: *const Node, name: [:0]const u8) ![]const u8 {
-        // TODO check this
+    pub fn getProperty(self: *const Node, gpa: Allocator, name: [:0]const u8) ![]const u8 {
         const value = c.xmlGetProp(self.ptr, @ptrCast(name.ptr));
         if (value == null) {
             return error.InvalidField;
         }
-        return std.mem.span(value);
+        defer c.xmlFreeProp(value);
+
+        return try gpa.dupe(u8, value);
     }
 
     pub fn parent(self: *const Node) ?Node {

@@ -10,10 +10,12 @@ const Node = types.Node;
 
 const utils = @import("utils.zig");
 
-fn getProperty(comptime T: type, node: Node, property_name: []const u8) !T {
+fn getProperty(comptime T: type, gpa: Allocator, node: Node, property_name: []const u8) !T {
     assert(@typeInfo(T) != .@"struct");
 
-    const val_str = try node.getProperty(@ptrCast(property_name));
+    const val_str = try node.getProperty(gpa, @ptrCast(property_name));
+    errdefer gpa.free(val_str);
+
     return try strToT(T, val_str);
 }
 
@@ -33,7 +35,7 @@ pub fn nodeToT(comptime T: type, alloc: Allocator, node: Node) !T {
             .array => {}, // parse [4] of struct -- no u8 or str allowed as array or pointer
             .pointer => |ptr| {
                 if (ptr.child == u8) {
-                    const value = node.getProperty(field.name) catch |e| if (field.default_value_ptr) |def| def else return e;
+                    const value = node.getProperty(alloc, field.name) catch |e| if (field.default_value_ptr) |def| def else return e;
                     @field(target, field.name) = value;
                 } else {
                     switch (@typeInfo(ptr.child)) {

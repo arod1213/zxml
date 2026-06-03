@@ -41,6 +41,7 @@ pub fn nodeToT(comptime T: type, alloc: Allocator, node: Node) !T {
                             const parent = find.getNode(node, field.name, .child) orelse return error.MissingField;
                             const type_name = utils.simpleTypeName(ptr.child);
                             const children = try find.getNodes(alloc, parent, type_name, .child);
+                            errdefer alloc.free(children);
 
                             var list = try std.ArrayList(ptr.child).initCapacity(alloc, 5);
                             errdefer list.deinit(alloc);

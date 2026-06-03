@@ -24,14 +24,10 @@ pub fn getNodesUnique(comptime T: type, gpa: Allocator, head: Node, name: []cons
 fn saveUniqueNode(comptime T: type, gpa: Allocator, node: Node, name: []const u8, map: *Map(T), key: fn (T) []const u8) !void {
     var current: ?Node = node;
 
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-    const arena_alloc = arena.allocator();
-
     while (current) |n| : (current = n.next()) {
         if (std.mem.eql(u8, n.name, name)) {
             // change field name for non structs
-            const value = parse.nodeToT(T, arena_alloc, n) catch |e| {
+            const value = parse.nodeToT(T, gpa, n) catch |e| {
                 std.log.err("parse err: {any}", .{e});
                 continue;
             };

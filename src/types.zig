@@ -135,7 +135,7 @@ pub const Node = struct {
         if (value == null) {
             return error.InvalidField;
         }
-        defer c.xmlFreeProp(value);
+        defer c.xmlFree.?(value);
 
         return try gpa.dupe(u8, std.mem.span(value));
     }

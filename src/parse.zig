@@ -61,7 +61,7 @@ pub fn nodeToT(comptime T: type, alloc: Allocator, node: Node) !T {
                 }
             }, // parse []struct
             else => {
-                const value = getProperty(field.type, node, field.name) catch |e| blk: {
+                const value = getProperty(field.type, alloc, node, field.name) catch |e| blk: {
                     break :blk field.defaultValue() orelse return e;
                 };
                 @field(target, field.name) = value;
